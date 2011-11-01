@@ -15,7 +15,7 @@ ul.language-tabs li a {
     padding: 4px 8px;
     color: #000000;
     border: 1px solid #CCCCCC;
-    background: url("/admin_media/img/admin/nav-bg.gif") repeat-x scroll center bottom white
+    background: url("/static/admin/img/admin/nav-bg.gif") repeat-x scroll center bottom white
 }
 
 ul.language-tabs li.selected span {

@@ -45,9 +45,14 @@ class MultilingualModelFormMetaclass(ModelFormMetaclass):
                     exclude = ('id', 'language_code', 'master')
                 else:
                     exclude = list(opts.exclude) + ['id', 'language_code', 'master']
-                fields.update(fields_for_model(
+                translated_fields = fields_for_model(
                     translation_model, opts.fields, exclude, opts.widgets, formfield_callback
-                ))
+                )
+
+                # Copy translated fields to fields, skipping empty fields
+                for field_name, field in translated_fields.items():
+                    if field:
+                        fields[field_name] = field
 
             # Override default model fields with any custom declared ones
             # (plus, include all the other declared fields).

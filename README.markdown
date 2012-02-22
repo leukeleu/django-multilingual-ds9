@@ -29,6 +29,8 @@ but basic should not differ.
     Remember that these will keep objects with no translation in result set unless you manually remove them.
   * `select_related(RELATED_NAME)` does what expected, tries to cache translation in other query
   * `get/filter/exclude(RELATED_NAME)` selection by existence and parameters of whole translation object
+* Administration
+  * `search_fields` does not handle `FIELD_NAME_LANGCODE`, you need to use regular foreign key lookup `RELATED_NAME__FIELD_NAME`
 
 ### Old features ###
 I have not yet decided what to do with following features:

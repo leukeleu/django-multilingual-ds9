@@ -13,7 +13,7 @@ import warnings
 
 
 class LazyInit(object):
-    VERSION = ('0', '2', '0', 'beta')
+    VERSION = ('0', '2', '0')
     __version__ = '.'.join(VERSION)
 
     __deprecated__ = {

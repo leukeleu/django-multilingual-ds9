@@ -139,7 +139,7 @@ def get_field_alias(field_name, language_code):
 
 ### DEPRECATED ###
 import warnings
-from django.utils.translation import get_language, activate
+from django.utils.translation import activate
 
 def set_default_language(language_code):
     warnings.warn("Function 'set_default_language' is deprecated, use 'django.utils.translation.activate' instead. "

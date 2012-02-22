@@ -1,0 +1,27 @@
+[
+    {
+        "pk": 1,
+        "model": "admin.admintests",
+        "fields": {
+            "description": "description ěščřžýáíé"
+        }
+    },
+    {
+        "pk": 1,
+        "model": "admin.adminteststranslation",
+        "fields": {
+            "master": 1,
+            "language_code": "cs",
+            "title": "obsah ěščřžýáíé"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "admin.adminteststranslation",
+        "fields": {
+            "master": 1,
+            "language_code": "en",
+            "title": "content"
+        }
+    }
+]

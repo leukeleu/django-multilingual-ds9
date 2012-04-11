@@ -2,10 +2,14 @@
 Model admin for multilingual models
 """
 from django.contrib.admin import ModelAdmin
-from django.contrib.admin.util import flatten_fieldsets
+from django.contrib.admin.util import flatten_fieldsets, unquote
 from django.utils.encoding import force_unicode
 from django.utils.functional import curry
 from django.utils.translation import ugettext as _
+from django.conf.urls.defaults import patterns, url
+from django.utils.functional import update_wrapper
+from django.http import HttpResponseRedirect
+from django.core.exceptions import PermissionDenied
 
 from multilingual.forms.forms import multilingual_modelform_factory, MultilingualModelForm
 from multilingual.languages import get_dict, get_active, lock, release
@@ -106,3 +110,28 @@ class MultilingualModelAdmin(ModelAdmin):
             return super(MultilingualModelAdmin, self).change_view(request, object_id, context)
         finally:
             release()
+
+    def get_urls(self):
+        def wrap(view):
+            def wrapper(*args, **kwargs):
+                return self.admin_site.admin_view(view)(*args, **kwargs)
+            return update_wrapper(wrapper, view)
+
+        urls = super(MultilingualModelAdmin, self).get_urls()
+
+        new_urls = patterns('',
+            url(r'^(.+)/delete-translations/$', wrap(self.delete_translations_view))
+        )
+        return new_urls + urls
+
+    def delete_translations_view(self, request, object_id):
+        obj = self.get_object(request, unquote(object_id))
+
+        if not self.has_change_permission(request, obj):
+            raise PermissionDenied
+
+        # Delete all translations except English
+        obj.translations.exclude(language_code='en').delete()
+
+        self.message_user(request, 'Removed translations')
+        return HttpResponseRedirect('../')

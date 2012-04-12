@@ -18,8 +18,8 @@ setup(
         'multilingual': [
             'templates/multilingual/admin/*.html',
             'flatpages/templates/flatpages/*.html',
-            #TODO: Check proper media location
-            'media/css/admin_styles.css',
+            'static/multilingual/admin_styles.css',
+            'static/multilingual/admin.js',
         ],
     },
 )

@@ -1,3 +1,2 @@
 recursive-include multilingual/templates *
-recursive-include multilingual/media *
 recursive-include multilingual/flatpages/templates *

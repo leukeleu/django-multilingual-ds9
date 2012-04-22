@@ -4,6 +4,7 @@
 {% block extrahead %}
     {{ block.super }}
     <link rel="stylesheet" type="text/css" href="{% get_static_prefix %}multilingual/css/admin_styles.css" />
+    <script src="{% get_static_prefix %}multilingual/admin.js"></script>
 {% endblock %}
 
 {% block object-tools %}
@@ -21,6 +22,13 @@
             {% endif %}
         {% endfor %}
     </ul>
+{% endblock %}
+
+{% block object-tools-items %}
+    {{ block.super }}
+    <li>
+        <a href="delete-translations/" id="remove-translations">Remove translations</a>
+    </li>
 {% endblock %}
 
 {% block after_field_sets %}

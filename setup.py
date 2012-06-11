@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 # TODO: Update __init__ to enable this version import
 #version = __import__('multilingual').__version__
-version = '0.2.0.4'
+version = '0.2.0.5'
 
 setup(
     name = 'django-multilingual-ds9',

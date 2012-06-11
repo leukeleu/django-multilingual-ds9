@@ -1,6 +1,8 @@
 """
 Provides virtual field to access to translation from multilingual model instance.
 """
+from django.conf import settings
+
 from multilingual.languages import get_active, FALLBACK_FIELD_SUFFIX
 try:
     from django.utils.log import logger
@@ -68,7 +70,7 @@ class TranslationProxyField(property):
 
     @property
     def fallback(self):
-        return self._fallback
+        return self._fallback or getattr(settings, 'MULTILINGUAL_ALWAYS_FALLBACK', False)
 
     def __get__(self, instance, instance_type=None):
         """

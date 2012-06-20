@@ -8,8 +8,6 @@ from django.core.exceptions import ImproperlyConfigured
 from django.utils.datastructures import SortedDict
 from django.utils.translation import get_language
 
-FALLBACK_FIELD_SUFFIX = 'any'
-
 #TODO: enable locks included in each other
 #TODO: decorator for language locks
 _lock = local()

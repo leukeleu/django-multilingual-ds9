@@ -3,7 +3,7 @@ Provides virtual field to access to translation from multilingual model instance
 """
 from django.conf import settings
 
-from multilingual.languages import get_active, FALLBACK_FIELD_SUFFIX
+from multilingual.languages import get_active
 try:
     from django.utils.log import logger
 except ImportError:
@@ -27,8 +27,9 @@ class TranslationProxyField(property):
         names = [field_name]
         if language_code is not None:
             names.append(language_code.replace('-', '_'))
-        if fallback:
-            names.append(FALLBACK_FIELD_SUFFIX)
+
+        # Changed: don't set fallback field suffix
+
         self.name = '_'.join(names)
         super(TranslationProxyField, self).__init__()
 
@@ -70,7 +71,7 @@ class TranslationProxyField(property):
 
     @property
     def fallback(self):
-        return self._fallback or getattr(settings, 'MULTILINGUAL_ALWAYS_FALLBACK', False)
+        return self._fallback
 
     def __get__(self, instance, instance_type=None):
         """

@@ -75,8 +75,15 @@ class MultilingualModelBase(ModelBase):
             for language_code in get_all():
                 proxy = TranslationProxyField(field.name, language_code)
                 attrs[proxy.name] = proxy
-            proxy = TranslationProxyField(field.name, None)
-            attrs[proxy.name] = proxy
+
+            # Fallback:
+            # - default field has a fallback (this is different from the original multilingual)
+            # - fields with language extension don't have a fallback
+            #
+            # e.g.:
+            #  country.name -> fallback
+            #  country.name_es -> no fallback
+
             proxy = TranslationProxyField(field.name, None, fallback=True)
             attrs[proxy.name] = proxy
 

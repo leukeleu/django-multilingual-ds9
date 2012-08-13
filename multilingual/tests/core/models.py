@@ -20,3 +20,11 @@ class Managing(MultilingualModel):
 
     class Translation:
         name = models.CharField(max_length=20)
+
+
+class Untranslated(models.Model):
+    """
+    Model is not translated and has a reference to a translated model
+    """
+    name = models.CharField(max_length=20)
+    basic = models.ForeignKey(Basic)

@@ -156,6 +156,17 @@ class MultilingualModel(models.Model):
         elif self._translation_cache.has_key(language_code):
             return
 
+        translation = self._get_translation_from_select_related(language_code)
+
+        if not translation:
+            translation = self._get_translation_from_prefetch_related(language_code)
+
+        if not translation:
+            translation = self._get_translation_from_query(language_code)
+
+        self._translation_cache[language_code] = translation
+
+    def _get_translation_from_select_related(self, language_code):
         c_trans_model = self._meta.translation_model
 
         # see if translation was in the query
@@ -175,17 +186,36 @@ class MultilingualModel(models.Model):
                 break
 
         if translation_data is not None:
-            translation = c_trans_model(language_code=language_code, master=self, **translation_data)
-            self._translation_cache[language_code] = translation
+            return c_trans_model(language_code=language_code, master=self, **translation_data)
         else:
-            # If we do not have translation (e.g. was not part of query)
-            # we will try direct query to load it
-            try:
-                # TODO, XXX: get correct related_name instead of 'translations' !!!
-                self._translation_cache[language_code] = self.translations.get(language_code=language_code)
-            except c_trans_model.DoesNotExist:
-                # translation does not exist, we store None to avoid repetitive calls of this code
-                self._translation_cache[language_code] = None
+            return None
+
+    def _get_translation_from_query(self, language_code):
+        c_trans_model = self._meta.translation_model
+
+        # If we do not have translation (e.g. was not part of query)
+        # we will try direct query to load it
+        try:
+            # TODO, XXX: get correct related_name instead of 'translations' !!!
+            return self.translations.get(language_code=language_code)
+        except c_trans_model.DoesNotExist:
+            # translation does not exist, we store None to avoid repetitive calls of this code
+            return None
+
+    def _get_translation_from_prefetch_related(self, language_code):
+        if not hasattr(self, '_prefetched_objects_cache'):
+            return None
+
+        translations = self._prefetched_objects_cache.get('translations')
+
+        if not translations:
+            return None
+
+        for translation in translations:
+            if translation.language_code == language_code and self.pk == translation.master_id:
+                return translation
+
+        return None
 
     def _get_translation(self, language_code, fallback=False, can_create=False):
         """

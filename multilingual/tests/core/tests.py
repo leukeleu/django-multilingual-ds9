@@ -5,8 +5,9 @@ This tests standard behaviour of multilingual models
 from django.test import TestCase
 
 from multilingual.languages import lock, release
+from multilingual.db.models.query import MultilingualQuerySet
 
-from models import Basic, Managing
+from models import Basic, Managing, Untranslated
 
 
 class ModelTest(TestCase):
@@ -96,9 +97,20 @@ class ModelTest(TestCase):
         self.assertEqual(result, proper_result)
 
     def test16_manager_select_related(self):
-        obj = Managing.objects.select_related('translations').get(pk=1)
-        #TODO: we should check instead that translation cache is created without subsequent SQL request
-        self.assertEqual(obj._trans_name_cs, u'a')
+        def query_without_select_related():
+            obj = Managing.objects.get(pk=1)
+            self.assertEqual(obj.name_cs, u'a')
+
+        def query_with_select_related():
+            obj = Managing.objects.select_related('translations').get(pk=1)
+            self.assertEqual(obj.name_cs, u'a')
+
+        # setup
+        Untranslated.objects.create(name='u1', basic_id=1)
+
+        # tests
+        self.assertNumQueries(2, query_without_select_related)
+        self.assertNumQueries(1, query_with_select_related)
 
     def test17_manager_values(self):
         names = [u'e', u'é', u'ě']
@@ -112,4 +124,27 @@ class ModelTest(TestCase):
         values = Managing.objects.filter(shortcut__startswith=u'e').values_list('name', flat=True)
         self.assertEqual(set(values), names)
 
+    def test19_manager_prefetch_related(self):
+        def query_from_untranslated_model():
+            lock('en')
+            try:
+                # Use prefetch_related; start the query from an untranslated model
+                qs = Untranslated.objects\
+                    .select_related('basic')\
+                    .prefetch_related('basic__translations')
+
+                self.assertEqual(
+                    ','.join(
+                        '%s %s' % (u.name, u.basic.title) for u in qs
+                    ),
+                    'u1 content,u2 only english'
+                )
+            finally:
+                release()
+
+        # setup
+        Untranslated.objects.create(name='u1', basic_id=1)
+        Untranslated.objects.create(name='u2', basic_id=3)
+
+        self.assertNumQueries(2, query_from_untranslated_model)
     #TODO: test other manager methods

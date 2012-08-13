@@ -25,7 +25,6 @@ class ModelTest(unittest.TestCase):
         # Test proxy fields reading
         obj = Basic.objects.get(pk=1)
         self.assertEqual(obj.title, u'obsah ěščřžýáíé')
-        self.assertEqual(obj.title_any, u'obsah ěščřžýáíé')
         self.assertEqual(obj.title_cs, u'obsah ěščřžýáíé')
         self.assertEqual(obj.title_en, u'content')
 
@@ -33,24 +32,20 @@ class ModelTest(unittest.TestCase):
         # Test proxy fields reading
         obj = Basic.objects.get(pk=2)
         self.assertEqual(obj.title, u'pouze čeština')
-        self.assertEqual(obj.title_any, u'pouze čeština')
         self.assertEqual(obj.title_cs, u'pouze čeština')
         self.assertEqual(obj.title_en, None)
         lock('en')
-        self.assertEqual(obj.title, None)
-        self.assertEqual(obj.title_any, u'pouze čeština')
+        self.assertEqual(obj.title, u'pouze čeština')
         release()
 
         obj = Basic.objects.get(pk=3)
         # Do not forget we have activated czech language
         self.assertEqual(obj.title, None)
-        self.assertEqual(obj.title_any, None)
         self.assertEqual(obj.title_cs, None)
         self.assertEqual(obj.title_en, u'only english')
 
         obj = Basic.objects.get(pk=4)
         self.assertEqual(obj.title, None)
-        self.assertEqual(obj.title_any, None)
         self.assertEqual(obj.title_cs, None)
         self.assertEqual(obj.title_en, None)
 

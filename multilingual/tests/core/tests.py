@@ -2,17 +2,16 @@
 """
 This tests standard behaviour of multilingual models
 """
-import unittest
+from django.test import TestCase
 
 from multilingual.languages import lock, release
 
 from models import Basic, Managing
 
 
-class ModelTest(unittest.TestCase):
+class ModelTest(TestCase):
     def tearDown(self):
         # Remove language locks if any remains
-        # TODO: rollback after each test, to get database to the same initial state
         release()
 
     # Model tests
@@ -68,12 +67,16 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(obj.name, u'ň')
 
     def test13_manager_get_or_create(self):
+        Managing.objects.create(shortcut=u'n2', name_cs=u'ň')
+
         obj, created = Managing.objects.get_or_create(shortcut=u'n2', name_cs=u'ň')
         self.assertEqual(created, False)
         self.assertEqual(obj.shortcut, u'n2')
         self.assertEqual(obj.name, u'ň')
 
     def test14_manager_delete(self):
+        Managing.objects.create(shortcut=u'n2', name_cs=u'ň')
+
         ManagingTranslation = Managing._meta.translation_model
         obj = ManagingTranslation.objects.get(name=u'ň')
         self.assertEqual(obj.master.shortcut, u'n2')

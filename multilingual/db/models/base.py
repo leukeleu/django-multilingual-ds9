@@ -88,10 +88,11 @@ class MultilingualModelBase(ModelBase):
             attrs[proxy.name] = proxy
 
         # Handle manager
-        if not 'objects' in attrs:
+        manager = cls.find_manager(bases, attrs)
+        if not manager:
             # If there is no manager, set MultilingualManager as manager
             attrs['objects'] = MultilingualManager()
-        elif not isinstance(attrs['objects'], MultilingualManager):
+        elif not isinstance(manager, MultilingualManager):
             # Make sure that if the class specifies objects then it is a subclass of our Manager.
 
             # Don't check other managers since someone might want to have a non-multilingual manager, but assigning
@@ -107,6 +108,19 @@ class MultilingualModelBase(ModelBase):
         if name == '_meta':
             value = MultilingualOptions(value.meta, value.app_label)
         super(MultilingualModelBase, cls).add_to_class(name, value)
+
+    @classmethod
+    def find_manager(cls, bases, attrs):
+        manager = attrs.get('objects')
+        if manager:
+            return manager
+        else:
+            for base in bases:
+                manager = getattr(base, 'objects', None)
+                if manager:
+                    return manager
+
+        return None
 
 
 class MultilingualModel(models.Model):

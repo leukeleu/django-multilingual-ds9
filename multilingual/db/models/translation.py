@@ -25,7 +25,7 @@ class BaseTranslationMeta:
 class TranslationModelBase(ModelBase):
     def __new__(cls, name, bases, attrs):
         # This only happens for base multilingual models
-        if not attrs.has_key('Translation'):
+        if bases[0] == models.Model:
             #TODO: CHECK attrs here
             super_new = super(TranslationModelBase, cls).__new__
             return super_new(cls, name, bases, attrs)
@@ -34,8 +34,12 @@ class TranslationModelBase(ModelBase):
         attr_meta = attrs.pop('Meta', None)
 
         # Prepare attributes for translation model
-        trans_attrs = attrs['Translation'].__dict__.copy()
-        trans_attrs.pop('__doc__')
+        if 'Translation' in attrs:
+            trans_attrs = attrs['Translation'].__dict__.copy()
+            trans_attrs.pop('__doc__')
+        else:
+            trans_attrs = dict(__module__=attrs['__module__'])
+
         # original Meta of Translation Model
         trans_meta = trans_attrs.pop('Meta', None)
 
@@ -49,34 +53,36 @@ class TranslationModelBase(ModelBase):
         if not meta_attrs.has_key('db_table') and hasattr(attr_meta, 'db_table'):
             meta_attrs['db_table'] = attr_meta.db_table + 'translation'
 
-        # Handle unique constraints
-        meta_attrs['unique_together'] = list(meta_attrs.get('unique_together', []))
-        meta_attrs['unique_together'] = [
-            tuple(list(item) + ['language_code'])
-            for item in meta_attrs['unique_together']
-        ]
-        # append all unique fields to unique_together with 'language_code' field
-        # and remove their uniqueness
-        for item_name, item in trans_attrs.items():
-            if isinstance(item, models.Field) and item.unique and not item.primary_key:
-                meta_attrs['unique_together'].append((item_name, 'language_code'))
-                trans_attrs[item_name]._unique = False
-        # TODO: use TranslationModel.Meta instead of hardcoding
-        # Appending necessary unique together
-        meta_attrs['unique_together'].append(('language_code', 'master'))
+        is_abstract = meta_attrs.get('abstract', False)
+        if not is_abstract:
+            # Handle unique constraints
+            meta_attrs['unique_together'] = list(meta_attrs.get('unique_together', []))
+            meta_attrs['unique_together'] = [
+                tuple(list(item) + ['language_code'])
+                for item in meta_attrs['unique_together']
+            ]
+            # append all unique fields to unique_together with 'language_code' field
+            # and remove their uniqueness
+            for item_name, item in trans_attrs.items():
+                if isinstance(item, models.Field) and item.unique and not item.primary_key:
+                    meta_attrs['unique_together'].append((item_name, 'language_code'))
+                    trans_attrs[item_name]._unique = False
+            # TODO: use TranslationModel.Meta instead of hardcoding
+            # Appending necessary unique together
+            meta_attrs['unique_together'].append(('language_code', 'master'))
 
-        # TODO: enable related_name in Options
-        related_name = meta_attrs.pop('related_name', 'translations')
+            # TODO: enable related_name in Options
+            related_name = meta_attrs.pop('related_name', 'translations')
+
+            # Add 'master' field
+            trans_attrs['master'] = models.ForeignKey(
+                attrs['multilingual_model_name'],
+                related_name = related_name
+            )
 
         # TODO: use something already existing instead of BaseTranslationMeta
         trans_attrs['Meta'] = classobj.__new__(classobj, 'Meta', (BaseTranslationMeta,), meta_attrs)
         ### END - Create Meta for TranslationModel
-
-        # Add 'master' field
-        trans_attrs['master'] = models.ForeignKey(
-            attrs['multilingual_model_name'],
-            related_name = related_name
-        )
 
         return super(TranslationModelBase, cls).__new__(cls, name, bases, trans_attrs)
 

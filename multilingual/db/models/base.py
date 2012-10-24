@@ -61,44 +61,48 @@ class MultilingualModelBase(ModelBase):
 
         translation_name = name + "Translation"
         trans_attrs['multilingual_model_name'] = name
-        c_trans_model = TranslationModelBase(translation_name, (TranslationModel, ), trans_attrs)
+        c_trans_model = TranslationModelBase(translation_name, cls.get_translation_model_bases(bases), trans_attrs)
         ### END - Build translation model
 
         ### And some changes before we build multilingual model
         # Add translation model to attrs
         attrs['translation_model'] = c_trans_model
 
-        # Add proxies for translated fields into attrs
-        for field in (c_trans_model._meta.fields + c_trans_model._meta.many_to_many):
-            if field.name in ('id', 'language_code', 'master'):
-                continue
-            for language_code in get_all():
-                proxy = TranslationProxyField(field.name, language_code)
+        meta = attrs.get('Meta', None)
+        is_abstract = meta and getattr(meta, 'abstract', False)
+
+        if not is_abstract:
+            # Add proxies for translated fields into attrs
+            for field in (c_trans_model._meta.fields + c_trans_model._meta.many_to_many):
+                if field.name in ('id', 'language_code', 'master'):
+                    continue
+                for language_code in get_all():
+                    proxy = TranslationProxyField(field.name, language_code)
+                    attrs[proxy.name] = proxy
+
+                # Fallback:
+                # - default field has a fallback (this is different from the original multilingual)
+                # - fields with language extension don't have a fallback
+                #
+                # e.g.:
+                #  country.name -> fallback
+                #  country.name_es -> no fallback
+
+                proxy = TranslationProxyField(field.name, None, fallback=True)
                 attrs[proxy.name] = proxy
 
-            # Fallback:
-            # - default field has a fallback (this is different from the original multilingual)
-            # - fields with language extension don't have a fallback
-            #
-            # e.g.:
-            #  country.name -> fallback
-            #  country.name_es -> no fallback
+            # Handle manager
+            manager = cls.find_manager(bases, attrs)
+            if not manager:
+                # If there is no manager, set MultilingualManager as manager
+                attrs['objects'] = MultilingualManager()
+            elif not isinstance(manager, MultilingualManager):
+                # Make sure that if the class specifies objects then it is a subclass of our Manager.
 
-            proxy = TranslationProxyField(field.name, None, fallback=True)
-            attrs[proxy.name] = proxy
-
-        # Handle manager
-        manager = cls.find_manager(bases, attrs)
-        if not manager:
-            # If there is no manager, set MultilingualManager as manager
-            attrs['objects'] = MultilingualManager()
-        elif not isinstance(manager, MultilingualManager):
-            # Make sure that if the class specifies objects then it is a subclass of our Manager.
-
-            # Don't check other managers since someone might want to have a non-multilingual manager, but assigning
-            # a non-multilingual manager to objects would be a common mistake.
-            raise ValueError("Model %s specifies translations, so its 'objects' manager must be a subclass of "\
-                             "multilingual.Manager." % name)
+                # Don't check other managers since someone might want to have a non-multilingual manager, but assigning
+                # a non-multilingual manager to objects would be a common mistake.
+                raise ValueError("Model %s specifies translations, so its 'objects' manager must be a subclass of "\
+                                 "multilingual.Manager." % name)
 
         # And now just create multilingual model
         return super(MultilingualModelBase, cls).__new__(cls, name, bases, attrs)
@@ -109,8 +113,8 @@ class MultilingualModelBase(ModelBase):
             value = MultilingualOptions(value.meta, value.app_label)
         super(MultilingualModelBase, cls).add_to_class(name, value)
 
-    @classmethod
-    def find_manager(cls, bases, attrs):
+    @staticmethod
+    def find_manager(bases, attrs):
         manager = attrs.get('objects')
         if manager:
             return manager
@@ -121,6 +125,16 @@ class MultilingualModelBase(ModelBase):
                     return manager
 
         return None
+
+    @staticmethod
+    def get_translation_model_bases(bases):
+        meta =  getattr(bases[0], '_meta', None)
+        if meta:
+            translation_model = meta.translation_model
+        else:
+            translation_model = TranslationModel
+
+        return translation_model,
 
 
 class MultilingualModel(models.Model):

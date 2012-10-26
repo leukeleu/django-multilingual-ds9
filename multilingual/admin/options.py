@@ -6,7 +6,7 @@ from django.contrib.admin.util import flatten_fieldsets, unquote
 from django.utils.encoding import force_unicode
 from django.utils.functional import curry
 from django.utils.translation import ugettext as _
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 from django.utils.functional import update_wrapper
 from django.http import HttpResponseRedirect
 from django.core.exceptions import PermissionDenied

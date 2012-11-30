@@ -120,9 +120,15 @@ class MultilingualModelBase(ModelBase):
             return manager
         else:
             for base in bases:
-                manager = getattr(base, 'objects', None)
-                if manager:
-                    return manager
+                if base._meta.abstract:
+                    # If the class is abstract, then Django does not return the 'objects' attribute
+                    # Get the manager from 'abstract_managers'
+                    if base._meta.abstract_managers:
+                        return base._meta.abstract_managers[0][2]
+                else:
+                    manager = getattr(base, 'objects', None)
+                    if manager:
+                        return manager
 
         return None
 

@@ -83,10 +83,6 @@ You may see tests for more specific usage
     language.release()
 
 ### Tests ###
-To run tests for multilingual just set
-
-    TEST_RUNNER = 'multilingual.tests.MultilingualTestSuiteRunner'
-
-in your settings. And run in your project
+To test multilingual just run
 
     python manage.py test multilingual

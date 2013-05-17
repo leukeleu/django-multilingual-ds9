@@ -93,9 +93,6 @@ class TranslationProxyField(property):
         """
         Sets field translation
         """
-        if instance is None:
-            raise AttributeError(u"%s must be accessed via instance" % self.name)
-
         translation = instance._get_translation(
             self.language_code,
             can_create=True

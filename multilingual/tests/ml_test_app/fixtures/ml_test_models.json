@@ -1,36 +1,14 @@
 [
     {
         "pk": 1,
-        "model": "forms.foo",
+        "model": "ml_test_app.multiling",
         "fields": {
-            "description": "regular ěščřžýáíé"
+            "name": "first"
         }
     },
-    {
-        "pk": 2,
-        "model": "forms.foo",
-        "fields": {
-            "description": "only czech"
-        }
-    },
-    {
-        "pk": 3,
-        "model": "forms.foo",
-        "fields": {
-            "description": "only english"
-        }
-    },
-    {
-        "pk": 4,
-        "model": "forms.foo",
-        "fields": {
-            "description": "no translation"
-        }
-    },
-
     {
         "pk": 1,
-        "model": "forms.footranslation",
+        "model": "ml_test_app.multilingtranslation",
         "fields": {
             "master": 1,
             "language_code": "cs",
@@ -39,29 +17,53 @@
     },
     {
         "pk": 2,
-        "model": "forms.footranslation",
+        "model": "ml_test_app.multilingtranslation",
         "fields": {
             "master": 1,
             "language_code": "en",
             "title": "content"
         }
     },
+
+    {
+        "pk": 2,
+        "model": "ml_test_app.multiling",
+        "fields": {
+            "name": "only czech"
+        }
+    },
     {
         "pk": 3,
-        "model": "forms.footranslation",
+        "model": "ml_test_app.multilingtranslation",
         "fields": {
             "master": 2,
             "language_code": "cs",
             "title": "pouze čeština"
         }
     },
+
+    {
+        "pk": 3,
+        "model": "ml_test_app.multiling",
+        "fields": {
+            "name": "only english"
+        }
+    },
     {
         "pk": 4,
-        "model": "forms.footranslation",
+        "model": "ml_test_app.multilingtranslation",
         "fields": {
             "master": 3,
             "language_code": "en",
             "title": "only english"
+        }
+    },
+
+    {
+        "pk": 4,
+        "model": "ml_test_app.multiling",
+        "fields": {
+            "name": "untranslated"
         }
     }
 ]

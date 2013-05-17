@@ -11,13 +11,13 @@
     {{ block.super }}
     <ul class="language-tabs">
         {% for code, name in LANGUAGES %}
-            {% if code == LANGUAGE %}
+            {% if code == ML_ADMIN_LANGUAGE %}
                 <li class="selected">
                     <span>{{ name }}</span>
                 </li>
             {% else %}
                 <li>
-                    <a href="?language={{ code }}">{{ name }}</a>
+                    <a href="?ml_admin_language={{ code }}">{{ name }}</a>
                 </li>
             {% endif %}
         {% endfor %}
@@ -32,5 +32,5 @@
 {% endblock %}
 
 {% block after_field_sets %}
-    <input type="hidden" name="language" value="{{ LANGUAGE }}">
+    <input type="hidden" name="ml_admin_language" value="{{ ML_ADMIN_LANGUAGE }}" />
 {% endblock %}

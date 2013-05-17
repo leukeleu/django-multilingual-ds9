@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+    <object pk="1" model="auth.user">
+        <field name="username" type="CharField">admin</field>
+        <!-- 'admin' -->
+        <field name="password" type="CharField">pbkdf2_sha256$10000$flhW4qiCUahM$e1+Kj3RsiLw4PCma24EwhLqWxQb0fwQ4WdXlPYpF2zo=</field>
+        <field name="is_staff" type="BooleanField">True</field>
+        <field name="is_superuser" type="BooleanField">True</field>
+    </object>
+</django-objects>

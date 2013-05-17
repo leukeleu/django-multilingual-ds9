@@ -158,8 +158,6 @@ class MultilingualModel(models.Model):
         Change save method to save translations when multilingual object is saved.
         """
         super(MultilingualModel, self).save(force_insert, force_update, using)
-        if not hasattr(self, '_translation_cache'):
-            return
         for translation in self._translation_cache.values():
             # skip missing translations
             if translation is None:

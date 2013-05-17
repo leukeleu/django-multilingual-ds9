@@ -17,10 +17,7 @@ from multilingual.languages import get_dict, get_active, lock, release
 #TODO: Inline model admins
 
 
-class MultilingualModelAdmin(ModelAdmin):
-    """
-    Model admin for multilingual models
-    """
+class MultilingualModelAdminMixin(object):
     form = MultilingualModelForm
 
     # use special template to render tabs for languages on top
@@ -75,7 +72,7 @@ class MultilingualModelAdmin(ModelAdmin):
         # processor.
         # TODO: Make this a hidden form field.
         context['LANGUAGE'] = get_active()
-        return super(MultilingualModelAdmin, self).render_change_form(request, context, **kwargs)
+        return super(MultilingualModelAdminMixin, self).render_change_form(request, context, **kwargs)
 
     def add_view(self, request, form_url='', extra_context=None):
         """
@@ -93,7 +90,7 @@ class MultilingualModelAdmin(ModelAdmin):
                 ),
             }
             context.update(extra_context or {})
-            return super(MultilingualModelAdmin, self).add_view(request, form_url, context)
+            return super(MultilingualModelAdminMixin, self).add_view(request, form_url, context)
         finally:
             release()
 
@@ -116,7 +113,7 @@ class MultilingualModelAdmin(ModelAdmin):
             }
             context.update(extra_context or {})
             kwargs['extra_context'] = context
-            return super(MultilingualModelAdmin, self).change_view(request, object_id, **kwargs)
+            return super(MultilingualModelAdminMixin, self).change_view(request, object_id, **kwargs)
         finally:
             release()
 
@@ -126,7 +123,7 @@ class MultilingualModelAdmin(ModelAdmin):
                 return self.admin_site.admin_view(view)(*args, **kwargs)
             return update_wrapper(wrapper, view)
 
-        urls = super(MultilingualModelAdmin, self).get_urls()
+        urls = super(MultilingualModelAdminMixin, self).get_urls()
 
         new_urls = patterns('',
             url(r'^(.+)/delete-translations/$', wrap(self.delete_translations_view))
@@ -144,3 +141,10 @@ class MultilingualModelAdmin(ModelAdmin):
 
         self.message_user(request, 'Removed translations')
         return HttpResponseRedirect('../')
+
+
+class MultilingualModelAdmin(MultilingualModelAdminMixin, ModelAdmin):
+    """
+    Model admin for multilingual models
+    """
+    pass

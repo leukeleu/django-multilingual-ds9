@@ -117,9 +117,9 @@ class MultilingualQuery(Query):
 
             # This is main code of this method, build extra_select that might be used by fill_translation_cache
             for trans_field in translation_fields:
-                extra_select[get_field_alias(trans_field, language_code)] = '%s.`%s`' % (
+                extra_select[get_field_alias(trans_field, language_code)] = '%s.%s' % (
                     get_table_alias(trans_opts.db_table, language_code),
-                    trans_field
+                    connection.ops.quote_name(trans_field)
                 )
 
             # XXX: this is not safe if translation model has no fields, can it happen??
